@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pangkalan Data Seni - TKJ</title>
+<style>
+/* TEMA TERMINAL/HACKER TKJ */
+:root {
+  --bg: #0c0c0c;
+  --surface: #141414;
+  --ink: #00ff00;
+  --muted: #009900;
+  --line: #004400;
+  --a: #00ff00; /* Aksen hijau neon */
+}
+* { box-sizing: border-box; }
+body { 
+  margin: 0; 
+  background: var(--bg); 
+  color: var(--ink); 
+  font: 16px/1.6 'Courier New', Courier, monospace; 
+}
+h1, h2, h3 { margin: 0; line-height: 1.05; letter-spacing: -0.02em; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.5rem) !important; } 
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px dashed var(--a); outline-offset: 3px; }
+svg { display: block; width: 100%; height: auto; }
+
+/* TRANSISI HALAMAN SPA */
+.view {
+  display: none; opacity: 0; 
+  transform: translateY(14px); 
+  transition: opacity .35s, transform .35s; 
+  min-height: 100vh; 
+  padding: 3rem 6vw;
+}
+.view.active { display: block; }
+.view.in { opacity: 1; transform: none; }
+
+/* TOMBOL TERMINAL */
+.btn {
+  display: inline-flex; border: 1px solid var(--a); 
+  border-radius: 0px; 
+  padding: .85rem 1.6rem; 
+  background: rgba(0, 255, 0, 0.1); 
+  color: var(--ink); font-weight: bold; 
+  transition: all .2s;
+  text-transform: uppercase;
+}
+.btn:hover { background: var(--a); color: var(--bg); transform: translateY(-2px); }
+.btn.ghost { background: transparent; border: 1px dashed var(--muted); }
+.btn.ghost:hover { border-style: solid; }
+
+.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; border-bottom: 1px dashed var(--line); padding-bottom: 1rem;}
+.brand { font-weight: 700; font-size: 1.2rem; }
+
+/* HALAMAN WELCOME */
+#welcome.active { display: grid; grid-template-columns: 1.05fr 1fr; gap: 4vw; align-items: center; }
+#welcome p { font-size: 1.1rem; color: var(--muted); max-width: 30rem; margin: 1.4rem 0 2.2rem; }
+.stack { position: relative; height: min(60vh, 460px); }
+.stack div { position: absolute; width: 64%; border-radius: 0px; overflow: hidden; border: 1px dashed var(--a); background: var(--surface); }
+.stack div:first-child { left: 0; top: 4%; transform: rotate(-3deg); }
+.stack div:last-child { right: 0; bottom: 4%; transform: rotate(4deg); }
+
+/* HALAMAN KATALOG KARYA */
+#select h2 { font-size: clamp(2rem, 5vw, 3rem); }
+#select .sub { color: var(--muted); margin: 1rem 0 2.5rem; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; max-width: 1100px; }
+.card { 
+  background: var(--surface); border: 1px solid var(--line); border-radius: 0px; 
+  overflow: hidden; text-align: left; padding: 0; display: flex; flex-direction: column; 
+  transition: all .3s;
+}
+.card:hover { transform: translateY(-6px); box-shadow: 0 0 15px rgba(0,255,0,0.3); border-color: var(--a); }
+.card .body { padding: 1.6rem 1.8rem 1.9rem; display: flex; flex-direction: column; gap: .6rem; }
+.card h3 { font-size: 1.6rem; }
+.card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.card .btn { align-self: flex-start; margin-top: 1rem; font-size: 0.9rem;}
+
+/* HALAMAN DETAIL KARYA */
+.detail { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; max-width: 1100px; align-items: center; }
+.detail .pic { border-radius: 0px; overflow: hidden; border: 1px dashed var(--a); position: relative;}
+.detail .pic::after { content: "ENCRYPTED_VISUAL"; position: absolute; top: 10px; left: 10px; background: #000; padding: 2px 5px; font-size: 0.8rem;}
+.detail h2 { font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 0.5rem; }
+.detail .meta { background: var(--a); color: var(--bg); display: inline-block; padding: 2px 8px; margin-bottom: 1.5rem; font-weight: bold;}
+.detail p { text-align: justify; }
+.detail dl { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1.4rem; margin: 1.6rem 0; background: #080808; padding: 1rem; border: 1px solid var(--line); }
+.detail dt { color: var(--muted); }
+.detail dd { margin: 0; font-weight: bold; }
+
+/* Efek Cursor Kedap-kedip */
+.cursor { display: inline-block; width: 10px; height: 1.1em; background-color: var(--a); vertical-align: middle; animation: blink 1s step-end infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+@media(max-width:860px){
+  #welcome.active, .cards, .detail { grid-template-columns: 1fr; }
+  .stack { height: 320px; }
+  h1 { font-size: 2.2rem !important; }
+}
+@media(prefers-reduced-motion:reduce){ * { transition: none!important; } }
+</style>
+</head>
+<body>
+
+<section id="welcome" class="view active in">
+  <div>
+    <h1><span id="typewriter"></span><span class="cursor"></span></h1>
+    <p id="siteSub"></p>
+    <button class="btn" id="start">> INIT_DATA_KARYA.sh</button>
+  </div>
+  <div class="stack" id="stack" aria-hidden="true"></div>
+</section>
+
+<section id="select" class="view">
+  <div class="top"><span class="brand" id="brand"></span><button class="btn ghost" id="toWelcome">< LOGOUT</button></div>
+  <h2>PILIH KARYA SENI</h2>
+  <p class="sub">Tentukan direktori karya yang ingin diekstrak datanya.</p>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="detail" class="view">
+  <div class="top"><button class="btn ghost" id="back">< BACK_TO_ROOT</button><span class="brand" id="brand2"></span></div>
+  <div class="detail" id="detailBox"></div>
+</section>
+
+<script>
+/* ===== DATA KARYA SENI TKJ ===== */
+const SITE = {
+  name: "root@tkj-art:~#",
+  sub: "(ini welcome screen)"
+};
+const CATALOGS = [
+  { type:"karya2d", name:"[ DIREKTORI: KARYA 2D ]", color:"#00ff00", bg:["#001100","#003300"],
+    short:"Karya dua dimensi yang merepresentasikan konsep jaringan dan sistem operasi.",
+    item:{ 
+      title:"[NAMA KARYA 2D]", 
+      cat:"Karya Seni Visual", 
+      year:"2026",
+      desc:"(ini text)",
+      specs:[
+        ["Media", "Kertas/Kanvas"],
+        ["Alat", "Spidol/Cat"],
+        ["Konsep", "Teknologi & Estetika"]
+      ],
+      colors:["#00ff00","#005500"], v:0, img:"" 
+    } 
+  },
+  { type:"karya3d", name:"[ DIREKTORI: KARYA 3D ]", color:"#00ff00", bg:["#110a00","#331a00"],
+    short:"Rekayasa E-Waste dari limbah praktikum Teknik Komputer & Jaringan.",
+    item:{ 
+      title:"MONUMEN E-WASTE UTP", 
+      cat:"Karya Seni Rakitan (Program Adiwiyata)", 
+      year:"2026",
+      desc:"(ini text)",
+      specs:[
+        ["Core Material", "Limbah Kabel UTP Cat5e"],
+        ["Baseboard", "PCB Bolong Praktikum"],
+        ["Assembly Tool", "Solder Taffware CS-31"],
+        ["Status", "Eco-Friendly"]
+      ],
+      colors:["#00ff00","#004400"], v:1, img:"" 
+    } 
+  }
+];
+
+/* ===== ILUSTRASI VECTOR (JIKA TIDAK ADA GAMBAR ASLI) ===== */
+function art(c){
+  const it=c.item, [b,a]=it.colors, [g1,g2]=c.bg, id="g"+Math.random().toString(36).slice(2,7);
+  let s=`<svg viewBox="0 0 400 300" role="img" aria-label="${it.title}">
+    <rect width="400" height="300" fill="${g2}"/>
+    <!-- Efek Grid Background -->
+    <path d="M0 50 H400 M0 100 H400 M0 150 H400 M0 200 H400 M0 250 H400 M50 0 V300 M100 0 V300 M150 0 V300 M200 0 V300 M250 0 V300 M300 0 V300 M350 0 V300" stroke="${g1}" stroke-width="1" />`;
+  
+  if(c.type==="karya2d"){
+    s+=`<rect x="80" y="60" width="240" height="180" rx="4" fill="#050505" stroke="${b}" stroke-width="2"/>
+        <rect x="80" y="60" width="240" height="25" fill="${b}"/>
+        <circle cx="95" cy="72" r="4" fill="#050505"/>
+        <circle cx="110" cy="72" r="4" fill="#050505"/>
+        <circle cx="125" cy="72" r="4" fill="#050505"/>
+        <text x="90" y="110" fill="${b}" font-family="monospace" font-size="12">> loading 2D_art...</text>
+        <text x="90" y="130" fill="${b}" font-family="monospace" font-size="12">> decrypting visual...</text>
+        <path d="M120 170 L150 140 L180 180 L220 130 L270 200" fill="none" stroke="${b}" stroke-width="3"/>`;
+  }else{
+    s+=`<rect x="120" y="80" width="160" height="140" fill="#050505" stroke="${b}" stroke-width="2"/>
+        <rect x="150" y="110" width="100" height="80" fill="none" stroke="${b}" stroke-width="4"/>
+        <circle cx="200" cy="150" r="20" fill="none" stroke="${b}" stroke-width="3"/>
+        <path d="M120 95 H90 M120 120 H90 M120 145 H90 M120 170 H90 M120 195 H90" stroke="${b}" stroke-width="3"/>
+        <path d="M280 95 H310 M280 120 H310 M280 145 H310 M280 170 H310 M280 195 H310" stroke="${b}" stroke-width="3"/>
+        <path d="M140 80 V50 M170 80 V50 M200 80 V50 M230 80 V50 M260 80 V50" stroke="${b}" stroke-width="3"/>
+        <path d="M140 220 V250 M170 220 V250 M200 220 V250 M230 220 V250 M260 220 V250" stroke="${b}" stroke-width="3"/>`;
+  }
+  return s+"</svg>";
+}
+const pic=c=>c.item.img?`<img src="${c.item.img}" alt="${c.item.title}" style="width:100%;height:300px;object-fit:cover;display:block;filter:grayscale(100%) brightness(0.8) contrast(1.5);">`:art(c);
+const $=id=>document.getElementById(id);
+
+/* ===== TRANSISI ANTAR TAMPILAN ===== */
+let current="welcome", busy=false;
+function show(id){
+  if(busy||id===current) return; busy=true;
+  const from=$(current), to=$(id);
+  from.classList.remove("in");
+  setTimeout(()=>{
+    from.classList.remove("active"); to.classList.add("active"); to.offsetHeight;
+    to.classList.add("in"); current=id; busy=false; window.scrollTo({top:0});
+  },300);
+}
+
+/* ===== ISI HALAMAN ===== */
+$("siteSub").textContent=SITE.sub;
+$("brand").textContent=$("brand2").textContent=SITE.name;
+document.title="Terminal TKJ Art";
+$("stack").innerHTML=CATALOGS.map(c=>`<div>${pic(c)}</div>`).join("");
+$("cards").innerHTML=CATALOGS.map((c,n)=>`<button class="card" data-n="${n}" style="--a:${c.color}">
+  ${pic(c)}<div class="body"><h3>${c.name}</h3><p>${c.short}</p><span class="btn">> EXECUTE: buka_data.sh</span></div></button>`).join("");
+
+function openItem(n){
+  const c=CATALOGS[n], it=c.item;
+  $("detail").style.setProperty("--a",c.color);
+  $("detailBox").innerHTML=`<div class="pic">${pic(c)}</div><div>
+    <h2>${it.title}</h2><div class="meta">${c.name} | ${it.cat} | ${it.year}</div>
+    <p>${it.desc}</p><dl>${it.specs.map(([k,v])=>`<dt>> ${k}</dt><dd>${v}</dd>`).join("")}</dl></div>`;
+  show("detail");
+}
+
+/* ===== ANIMASI TYPEWRITER (HEADER) ===== */
+const textToType = "WELCOME SCREEN.";
+let typeIndex = 0;
+function typeWriter() {
+  if (typeIndex < textToType.length) {
+    document.getElementById("typewriter").innerHTML += textToType.charAt(typeIndex);
+    typeIndex++;
+    setTimeout(typeWriter, 80);
+  }
+}
+window.onload = function() { typeWriter(); };
+
+/* ===== EVENT TOMBOL ===== */
+$("start").onclick=()=>show("select");
+$("toWelcome").onclick=()=>show("welcome");
+$("back").onclick=()=>show("select");
+$("cards").onclick=e=>{const b=e.target.closest(".card"); if(b) openItem(+b.dataset.n);};
+</script>
+</body>
+</html>
